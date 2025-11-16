@@ -162,7 +162,7 @@ class FlutterDropzonePlugin extends FlutterDropzonePlatform {
           } else if (snapshot.hasError)
             return const Center(child: Text('Error loading library'));
           else
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox();
         },
       );
 }
