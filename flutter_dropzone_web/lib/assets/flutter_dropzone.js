@@ -52,6 +52,8 @@ class FlutterDropzone {
 
     var files = [];
     var strings = [];
+    var promises = [];
+
     if (event.dataTransfer.items) {
       for (let i = 0; i < event.dataTransfer.items.length; i++) {
         const item = event.dataTransfer.items[i];
@@ -60,7 +62,7 @@ class FlutterDropzone {
             if (this.dropMIME == null || this.dropMIME.includes(item.type)) {
               const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
               if (entry && entry.isDirectory) {
-                await this.#traverseDirectory(entry, "", files);
+                promises.push(this.#traverseDirectory(entry, "", files));
               } else {
                 const file = item.getAsFile();
                 if (file) {
@@ -77,11 +79,10 @@ class FlutterDropzone {
             break;
 
           case "string":
-            const that = this;
-            const text = await this.#getItemAsString(item);
-            // if (that.onDrop != null) that.onDrop(event, text);
-            if (that.onDropString != null) that.onDropString(event, text);
-            strings.push(text);
+            promises.push(this.#getItemAsString(item).then(text => {
+                if (this.onDropString != null) this.onDropString(event, text);
+                strings.push(text);
+            }));
             break;
 
           default:
@@ -99,6 +100,8 @@ class FlutterDropzone {
          files.push(file);
        }
     }
+
+    await Promise.all(promises);
 
     if (this.onDropMultiple != null) {
       if (files.length > 0) this.onDropMultiple(event, files);
