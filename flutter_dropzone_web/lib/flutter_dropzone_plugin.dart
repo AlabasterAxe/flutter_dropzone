@@ -10,8 +10,7 @@ import 'package:flutter_dropzone_web/flutter_dropzone_web.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:web/web.dart' as web;
 
-const web.EventStreamProvider<web.Event> _flutterDropzoneWebReadyEvent =
-    web.EventStreamProvider<web.Event>('flutter_dropzone_web_ready');
+const web.EventStreamProvider<web.Event> _flutterDropzoneWebReadyEvent = web.EventStreamProvider<web.Event>('flutter_dropzone_web_ready');
 
 class FlutterDropzonePlugin extends FlutterDropzonePlatform {
   static final _views = <int, FlutterDropzoneView>{};
@@ -102,6 +101,14 @@ class FlutterDropzonePlugin extends FlutterDropzonePlatform {
   }
 
   @override
+  Future<String?> getFilePath(
+    DropzoneFileInterface file, {
+    required int viewId,
+  }) {
+    return _views[viewId]!.getFilePath(file);
+  }
+
+  @override
   Future<DateTime> getFileLastModified(
     DropzoneFileInterface file, {
     required int viewId,
@@ -143,18 +150,19 @@ class FlutterDropzonePlugin extends FlutterDropzonePlatform {
     Map<String, dynamic> creationParams,
     Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers,
     PlatformViewCreatedCallback onPlatformViewCreated,
-  ) => FutureBuilder<bool>(
-    future: _isReady,
-    builder: (context, snapshot) {
-      if (snapshot.hasData) {
-        return HtmlElementView(
-          viewType: 'io.flutter.plugins.flutter_dropzone/dropzone',
-          onPlatformViewCreated: onPlatformViewCreated,
-        );
-      } else if (snapshot.hasError)
-        return const Center(child: Text('Error loading library'));
-      else
-        return const Center(child: CircularProgressIndicator());
-    },
-  );
+  ) =>
+      FutureBuilder<bool>(
+        future: _isReady,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return HtmlElementView(
+              viewType: 'io.flutter.plugins.flutter_dropzone/dropzone',
+              onPlatformViewCreated: onPlatformViewCreated,
+            );
+          } else if (snapshot.hasError)
+            return const Center(child: Text('Error loading library'));
+          else
+            return const Center(child: CircularProgressIndicator());
+        },
+      );
 }

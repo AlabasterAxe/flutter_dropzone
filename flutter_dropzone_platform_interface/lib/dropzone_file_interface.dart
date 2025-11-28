@@ -4,6 +4,7 @@ abstract class DropzoneFileInterface {
   int get size; //
   int get lastModified; //
   String get webkitRelativePath;
+  String? get path;
 
   Object getNative();
 }

@@ -22,7 +22,8 @@ class DropzoneFileDummy implements DropzoneFileInterface {
   String get webkitRelativePath => '';
 
   @override
-  Object getNative() {
-    throw UnsupportedError('getNative: $defaultTargetPlatform is not supported');
-  }
+  String? get path => null;
+
+  @override
+  Object getNative() => throw UnimplementedError();
 }

@@ -52,25 +52,7 @@ class DropzoneView extends StatefulWidget {
   /// Event called when the user leaves a dropzone.
   final VoidCallback? onLeave;
 
-  const DropzoneView({
-    Key? key,
-    this.operation,
-    this.cursor,
-    this.mime,
-    this.gestureRecognizers,
-    this.onCreated,
-    this.onLoaded,
-    this.onError,
-    this.onHover,
-    @Deprecated('Use onDropFile or onDropString instead.') this.onDrop,
-    this.onDropFile,
-    this.onDropString,
-    this.onDropInvalid,
-    @Deprecated('Use onDropFiles or onDropStrings instead.') this.onDropMultiple,
-    this.onDropFiles,
-    this.onDropStrings,
-    this.onLeave,
-  }) : super(key: key);
+  const DropzoneView({Key? key, this.operation, this.cursor, this.mime, this.gestureRecognizers, this.onCreated, this.onLoaded, this.onError, this.onHover, @Deprecated('Use onDropFile or onDropString instead.') this.onDrop, this.onDropFile, this.onDropString, this.onDropInvalid, @Deprecated('Use onDropFiles or onDropStrings instead.') this.onDropMultiple, this.onDropFiles, this.onDropStrings, this.onLeave}) : super(key: key);
 
   @override
   State<DropzoneView> createState() => DropzoneViewState();
@@ -124,21 +106,13 @@ class DropzoneViewState extends State<DropzoneView> {
 
   @override
   Widget build(BuildContext context) {
-    final params = <String, dynamic>{
-      'operation': widget.operation,
-      'cursor': widget.cursor,
-      'mime': widget.mime,
-    };
-    return FlutterDropzonePlatform.instance.buildView(
-      params,
-      widget.gestureRecognizers,
-      (viewId) {
-        final ctrl = DropzoneViewController._create(viewId, widget, this);
-        _controller.complete(ctrl);
-        widget.onCreated?.call(ctrl);
-        FlutterDropzonePlatform.instance.init(params, viewId: viewId);
-      },
-    );
+    final params = <String, dynamic>{'operation': widget.operation, 'cursor': widget.cursor, 'mime': widget.mime};
+    return FlutterDropzonePlatform.instance.buildView(params, widget.gestureRecognizers, (viewId) {
+      final ctrl = DropzoneViewController._create(viewId, widget, this);
+      _controller.complete(ctrl);
+      widget.onCreated?.call(ctrl);
+      FlutterDropzonePlatform.instance.init(params, viewId: viewId);
+    });
   }
 }
 
@@ -149,57 +123,68 @@ class DropzoneViewController {
 
   DropzoneViewController._create(this.viewId, this.widget, this.state) {
     if (widget.onLoaded != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onLoaded(viewId: viewId)
           .listen((_) => widget.onLoaded!());
     }
     if (state.onError != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onError(viewId: viewId)
           .listen((msg) => state.onError!(msg.value));
     }
     if (state.onHover != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onHover(viewId: viewId)
           .listen((msg) => state.onHover!());
     }
     if (state.onDrop != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDrop(viewId: viewId)
           .listen((msg) => state.onDrop!(msg.value));
     }
     if (state.onDropFile != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDropFile(viewId: viewId)
           .listen((msg) => state.onDropFile!(msg.value!));
     }
     if (state.onDropString != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDropString(viewId: viewId)
           .listen((msg) => state.onDropString!(msg.value!));
     }
     if (state.onDropInvalid != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDropInvalid(viewId: viewId)
           .listen((msg) => state.onDropInvalid!(msg.value));
     }
     if (state.onDropMultiple != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDropMultiple(viewId: viewId)
           .listen((msg) => state.onDropMultiple!(msg.value));
     }
     if (state.onDropFiles != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDropFiles(viewId: viewId)
           .listen((msg) => state.onDropFiles!(msg.value!));
     }
     if (state.onDropStrings != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onDropStrings(viewId: viewId)
           .listen((msg) => state.onDropStrings!(msg.value!));
     }
     if (state.onLeave != null) {
-      FlutterDropzonePlatform.instance //
+      FlutterDropzonePlatform
+          .instance //
           .onLeave(viewId: viewId)
           .listen((msg) => state.onLeave!());
     }
@@ -207,10 +192,7 @@ class DropzoneViewController {
 
   /// Specify the [DragOperation] while dragging the file.
   Future<bool> setOperation(DragOperation operation) {
-    return FlutterDropzonePlatform.instance.setOperation(
-      operation,
-      viewId: viewId,
-    );
+    return FlutterDropzonePlatform.instance.setOperation(operation, viewId: viewId);
   }
 
   /// Specify the [CursorType] of the dropzone. [CursorType] is one the CSS cursor types.
@@ -227,15 +209,8 @@ class DropzoneViewController {
   ///
   /// Set [multiple] to allow picking more than one file.
   /// Returns the list of files picked by the user.
-  Future<List<DropzoneFileInterface>> pickFiles({
-    bool multiple = false,
-    List<String> mime = const [],
-  }) {
-    return FlutterDropzonePlatform.instance.pickFiles(
-      multiple,
-      mime: mime,
-      viewId: viewId,
-    );
+  Future<List<DropzoneFileInterface>> pickFiles({bool multiple = false, List<String> mime = const []}) {
+    return FlutterDropzonePlatform.instance.pickFiles(multiple, mime: mime, viewId: viewId);
   }
 
   /// Get the filename of the passed HTML file.
@@ -253,12 +228,14 @@ class DropzoneViewController {
     return FlutterDropzonePlatform.instance.getFileMIME(file, viewId: viewId);
   }
 
+  /// Get the relative path of the passed HTML file.
+  Future<String?> getFilePath(DropzoneFileInterface file) {
+    return FlutterDropzonePlatform.instance.getFilePath(file, viewId: viewId);
+  }
+
   /// Get the last modified date of the passed HTML file.
   Future<DateTime> getFileLastModified(DropzoneFileInterface file) {
-    return FlutterDropzonePlatform.instance.getFileLastModified(
-      file,
-      viewId: viewId,
-    );
+    return FlutterDropzonePlatform.instance.getFileLastModified(file, viewId: viewId);
   }
 
   /// Create a temporary URL to the passed HTML file.
@@ -270,10 +247,7 @@ class DropzoneViewController {
 
   /// Release a temporary URL previously created using [createFileUrl()].
   Future<bool> releaseFileUrl(String fileUrl) {
-    return FlutterDropzonePlatform.instance.releaseFileUrl(
-      fileUrl,
-      viewId: viewId,
-    );
+    return FlutterDropzonePlatform.instance.releaseFileUrl(fileUrl, viewId: viewId);
   }
 
   /// Get the contents of the passed HTML file.

@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'package:flutter_dropzone_platform_interface/flutter_dropzone_platform_interface.dart';
 import 'package:web/web.dart' as web;
 
@@ -24,6 +26,13 @@ class DropzoneFileWeb implements DropzoneFileInterface {
 
   @override
   String get webkitRelativePath => webFile.webkitRelativePath;
+
+  @override
+  String? get path {
+    // Access the 'path' property we added in JS
+    // web.File is an extension type on JSObject, so we can cast or use it directly if it implements JSObject
+    return (webFile as JSObject).getProperty('path'.toJS) as String?;
+  }
 
   @override
   web.File getNative() => webFile;

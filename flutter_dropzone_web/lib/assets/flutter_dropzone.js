@@ -58,10 +58,18 @@ class FlutterDropzone {
         switch (item.kind) {
           case "file":
             if (this.dropMIME == null || this.dropMIME.includes(item.type)) {
-              const file = item.getAsFile();
-              if (this.onDrop != null) this.onDrop(event, file);
-              if (this.onDropFile != null) this.onDropFile(event, file);
-              files.push(file);
+              const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+              if (entry && entry.isDirectory) {
+                await this.#traverseDirectory(entry, "", files);
+              } else {
+                const file = item.getAsFile();
+                if (file) {
+                  file.path = file.name;
+                  if (this.onDrop != null) this.onDrop(event, file);
+                  if (this.onDropFile != null) this.onDropFile(event, file);
+                  files.push(file);
+                }
+              }
             }
             else {
               if (this.onDropInvalid != null) this.onDropInvalid(event, item.type);
@@ -82,13 +90,14 @@ class FlutterDropzone {
         }
       }
     } else {
-      throw new Error("Shouldn't happen. Please, report if you ever encounter this.");
-//      for (let i = 0; i < event.dataTransfer.files.length; i++) {
-//        const file = event.dataTransfer.files[i];
-//        if (this.onDrop != null) this.onDrop(event, file);
-//        if (this.onDropFile != null) this.onDropFile(event, file);
-//        files.push(file);
-//      }
+      // Fallback for browsers not supporting dataTransfer.items (rare now)
+       for (let i = 0; i < event.dataTransfer.files.length; i++) {
+         const file = event.dataTransfer.files[i];
+         file.path = file.name;
+         if (this.onDrop != null) this.onDrop(event, file);
+         if (this.onDropFile != null) this.onDropFile(event, file);
+         files.push(file);
+       }
     }
 
     if (this.onDropMultiple != null) {
@@ -98,6 +107,36 @@ class FlutterDropzone {
 
     if (this.onDropFiles != null && files.length > 0) this.onDropFiles(event, files);
     if (this.onDropStrings != null && strings.length > 0) this.onDropStrings(event,strings);
+  }
+
+  async #traverseDirectory(entry, path, files) {
+    const reader = entry.createReader();
+    const entries = await new Promise((resolve) => {
+        let allEntries = [];
+        function read() {
+            reader.readEntries((results) => {
+                if (results.length > 0) {
+                    allEntries = allEntries.concat(results);
+                    read();
+                } else {
+                    resolve(allEntries);
+                }
+            });
+        }
+        read();
+    });
+
+    for (const child of entries) {
+        if (child.isDirectory) {
+            await this.#traverseDirectory(child, path + entry.name + "/", files);
+        } else {
+            const file = await new Promise((resolve) => child.file(resolve));
+            file.path = path + entry.name + "/" + child.name;
+            // Trigger single file drop events? Maybe not for folder contents to avoid spam.
+            // But we add to the list.
+            files.push(file);
+        }
+    }
   }
 
   #getItemAsString(item) {

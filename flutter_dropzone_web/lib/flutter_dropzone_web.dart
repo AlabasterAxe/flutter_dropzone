@@ -7,9 +7,7 @@ import 'dart:js_interop';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dropzone_platform_interface/flutter_dropzone_platform_interface.dart';
 // ignore: unused_import
-import 'file/dropzone_file_stub.dart'
-    if (dart.library.js_interop) 'file/dropzone_file_web.dart'
-    if (dart.library.io) 'file/dropzone_file_dummy.dart';
+import 'file/dropzone_file_stub.dart' if (dart.library.js_interop) 'file/dropzone_file_web.dart' if (dart.library.io) 'file/dropzone_file_dummy.dart';
 import 'package:web/web.dart' as web;
 
 class FlutterDropzoneView {
@@ -21,22 +19,19 @@ class FlutterDropzoneView {
 
   FlutterDropzoneView(this.viewId) {
     final id = 'dropzone-container-$viewId';
-    container =
-        web.HTMLDivElement()
-          ..id = id
-          ..style.pointerEvents = 'auto'
-          ..style.border = 'none'
-          // idea from https://keithclark.co.uk/articles/working-with-elements-before-the-dom-is-ready/
-          ..append(
-            web.HTMLStyleElement()
-              ..innerText =
-                  '@keyframes $id-animation {from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); }}',
-          )
-          ..style.animationName = '$id-animation'
-          ..style.animationDuration = '0.001s'
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..addEventListener('animationstart', _startCallback.toJS);
+    container = web.HTMLDivElement()
+      ..id = id
+      ..style.pointerEvents = 'auto'
+      ..style.border = 'none'
+      // idea from https://keithclark.co.uk/articles/working-with-elements-before-the-dom-is-ready/
+      ..append(
+        web.HTMLStyleElement()..innerText = '@keyframes $id-animation {from { clip: rect(1px, auto, auto, auto); } to { clip: rect(0px, auto, auto, auto); }}',
+      )
+      ..style.animationName = '$id-animation'
+      ..style.animationDuration = '0.001s'
+      ..style.width = '100%'
+      ..style.height = '100%'
+      ..addEventListener('animationstart', _startCallback.toJS);
   }
 
   void _startCallback(web.Event event) {
@@ -87,8 +82,8 @@ class FlutterDropzoneView {
     final completer = Completer<List<DropzoneFileInterface>>();
     final picker = web.HTMLInputElement();
     final isSafari = web.window.navigator.userAgent.toLowerCase().contains(
-      'safari',
-    );
+          'safari',
+        );
     picker.type = 'file';
     if (isSafari) web.document.body!.append(picker);
     picker.multiple = multiple;
@@ -129,6 +124,10 @@ class FlutterDropzoneView {
     return file.type;
   }
 
+  Future<String?> getFilePath(DropzoneFileInterface file) async {
+    return file.path;
+  }
+
   Future<DateTime> getFileLastModified(DropzoneFileInterface file) async {
     return DateTime.fromMillisecondsSinceEpoch(file.lastModified);
   }
@@ -162,59 +161,47 @@ class FlutterDropzoneView {
     }
   }
 
-  void _onLoaded() =>
-      FlutterDropzonePlatform.instance.events.add(DropzoneLoadedEvent(viewId));
+  void _onLoaded() => FlutterDropzonePlatform.instance.events.add(DropzoneLoadedEvent(viewId));
 
   void _onError(String error) => FlutterDropzonePlatform.instance.events.add(
-    DropzoneErrorEvent(viewId, error),
-  );
+        DropzoneErrorEvent(viewId, error),
+      );
 
-  void _onHover(web.MouseEvent event) =>
-      FlutterDropzonePlatform.instance.events.add(DropzoneHoverEvent(viewId));
+  void _onHover(web.MouseEvent event) => FlutterDropzonePlatform.instance.events.add(DropzoneHoverEvent(viewId));
 
-  void _onDrop(web.MouseEvent event, web.File data) => FlutterDropzonePlatform
-      .instance
-      .events
-      .add(DropzoneDropEvent(viewId, data));
+  void _onDrop(web.MouseEvent event, web.File data) => FlutterDropzonePlatform.instance.events.add(DropzoneDropEvent(viewId, data));
 
-  void _onDropFile(web.MouseEvent event, web.File file) =>
-      FlutterDropzonePlatform.instance.events.add(
+  void _onDropFile(web.MouseEvent event, web.File file) => FlutterDropzonePlatform.instance.events.add(
         DropzoneDropFileEvent(viewId, createFile(file)),
       );
 
-  void _onDropString(web.MouseEvent event, JSString string) =>
-      FlutterDropzonePlatform.instance.events.add(
+  void _onDropString(web.MouseEvent event, JSString string) => FlutterDropzonePlatform.instance.events.add(
         DropzoneDropStringEvent(viewId, string.toDart),
       );
 
-  void _onDropInvalid(web.MouseEvent event, JSString mime) =>
-      FlutterDropzonePlatform.instance.events.add(
+  void _onDropInvalid(web.MouseEvent event, JSString mime) => FlutterDropzonePlatform.instance.events.add(
         DropzoneDropInvalidEvent(viewId, mime.toDart),
       );
 
-  void _onDropMultiple(web.MouseEvent event, JSArray<web.File> data) =>
-      FlutterDropzonePlatform.instance.events.add(
+  void _onDropMultiple(web.MouseEvent event, JSArray<web.File> data) => FlutterDropzonePlatform.instance.events.add(
         DropzoneDropMultipleEvent(viewId, data.toDart),
       );
 
-  void _onDropFiles(web.MouseEvent event, JSArray<web.File> files) =>
-      FlutterDropzonePlatform.instance.events.add(
+  void _onDropFiles(web.MouseEvent event, JSArray<web.File> files) => FlutterDropzonePlatform.instance.events.add(
         DropzoneDropFilesEvent(
           viewId,
           files.toDart.map((file) => createFile(file)).toList(),
         ),
       );
 
-  void _onDropStrings(web.MouseEvent event, JSArray<JSString> strings) =>
-      FlutterDropzonePlatform.instance.events.add(
+  void _onDropStrings(web.MouseEvent event, JSArray<JSString> strings) => FlutterDropzonePlatform.instance.events.add(
         DropzoneDropStringsEvent(
           viewId,
           strings.toDart.map((string) => string.toDart).toList(),
         ),
       );
 
-  void _onLeave(web.MouseEvent event) =>
-      FlutterDropzonePlatform.instance.events.add(DropzoneLeaveEvent(viewId));
+  void _onLeave(web.MouseEvent event) => FlutterDropzonePlatform.instance.events.add(DropzoneLeaveEvent(viewId));
 }
 
 @JS('create')
